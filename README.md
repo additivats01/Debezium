@@ -50,26 +50,50 @@ Configures and runs a Kafka Connect container within the 'kafkapp' Pod.
 
 ### Plugin for Source Connector (Debezium Postgres)
 
+#### NSP Renewal DB Connector
 ```bash
-curl --location 'http://localhost:8083/connectors' \
---header 'Content-Type: application/json' \
---data '{
-    "name": "CDCDBPluginR",
-    "config": {
+curl --location 'http://localhost:8083/connectors' --header 'Content-Type: application/json' --data '{
+    "name": "cdcdbpluginrenewal",
+  "config": {
     "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
-    "database.user": "pguser",
-    "database.dbname": "strapiDB",
+    "database.user": "postgres",
+    "database.dbname": "nsp_renewal",
     "database.port": "5432",
     "plugin.name": "pgoutput",
     "key.converter.schemas.enable": "false",
-    "topic.prefix": "NPI.Strapi",
+    "topic.prefix": "NSP.renewal",
     "decimal.handling.mode": "string",
-    "database.hostname": "192.168.100.247",
-    "database.password": "password",
+    "database.hostname": "192.168.100.145",
+    "database.password": "Password54321",
     "value.converter.schemas.enable": "false",
-    "name": "StrapiDBconv",
+    "name": "cdcdbpluginrenewal",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-    "key.converter": "org.apache.kafka.connect.json.JsonConverter"
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "slot.name" : "renewal"
+  }
+}'
+
+```
+#### NSP Fresh DB Connector
+```bash
+curl --location 'http://localhost:8083/connectors' --header 'Content-Type: application/json' --data '{
+    "name": "cdcdbpluginfresh",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.user": "postgres",
+    "database.dbname": "nsp_fresh",
+    "database.port": "5432",
+    "plugin.name": "pgoutput",
+    "key.converter.schemas.enable": "false",
+    "topic.prefix": "NSP.fresh",
+    "decimal.handling.mode": "string",
+    "database.hostname": "192.168.100.145",
+    "database.password": "Password54321",
+    "value.converter.schemas.enable": "false",
+    "name": "cdcdbpluginfresh",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "slot.name" : "fresh"
   }
 }'
 
@@ -77,6 +101,11 @@ curl --location 'http://localhost:8083/connectors' \
 
 Registers a Debezium Postgres connector using the Kafka Connect REST API.
 
+#### Note: Update the wal to logical from replica in postgresql.conf file
+
+```bash
+wal_level = logical 
+```
 
 ## ActiveMQ Setup
 
@@ -107,6 +136,12 @@ Maven version: 3.8.6 and above
 
 ```bash
 Two databases: Fresh and Renewal
+```
+## PostgreSQL Container
+
+```bash
+podman run --name postgresql -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=Password54321 -p 5432:5432 -v /home/postgres_data_dir:/var/lib/postgresql/data -d postgres
+
 ```
 
 This document provides a detailed explanation of each component along with the corresponding commands for setup. Feel free to customize it further as needed.

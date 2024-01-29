@@ -11,23 +11,27 @@ This document provides step-by-step instructions for setting up a Change Data Ca
 
 ```bash
 podman pod create --name kafkapp -p 9000:9000 -p 9092:9092 -p 8083:8083 -p 2181:2181 -p 29092:29092
+```
 
 This command creates a Pod named 'kafkapp' with ports exposed for Kafka components.
 
-Zookeeper Container
+##Zookeeper Container
 
+```bash
 podman run --name zookeeper --pod kafkapp -dt -e ZOOKEEPER_CLIENT_PORT=2181 -e ZOOKEEPER_TICK_TIME=2000 confluentinc/cp-zookeeper:7.3.2
+```
 
 Launches a Zookeeper container within the 'kafkapp' Pod.
 
-Kafka Container
+##Kafka Container
 
+``` bash
 podman run --name kafka --pod kafkapp -dt -e KAFKA_BROKER_ID=1 -e KAFKA_ZOOKEEPER_CONNECT=localhost:2181 -e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://localhost:29092 -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 -e KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1 -e KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1 -e TOPIC_AUTO_CREATE=true confluentinc/cp-kafka:7.3.2
-
+```
 
 Runs a Kafka container within the 'kafkapp' Pod with specified configurations.
 
-Kafdrop Container
+##Kafdrop Container
 
 podman run --name kafdrop --pod kafkapp -d -e KAFKA_BROKERCONNECT=localhost:9092 -e JVM_OPTS="-Xms32M -Xmx64M" -e SERVER_SERVLET_CONTEXTPATH="/" docker.io/obsidiandynamics/kafdrop:latest
 
